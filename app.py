@@ -1,7 +1,16 @@
 import os
 import asyncio
 import streamlit as st
-from dotenv import load_dotenv
+load_dotenv()
+
+# --- STREAMLIT CLOUD SECRET BRIDGE ---
+# Subprocesses do not natively inherit magical proxy objects like st.secrets!
+# We absolutely MUST cast them identically into true isolated OS variables natively!
+try:
+    if "FIREBASE_JSON_STRING" in st.secrets:
+        os.environ["FIREBASE_JSON_STRING"] = str(st.secrets["FIREBASE_JSON_STRING"])
+except Exception:
+    pass
 
 from langchain_core.messages import HumanMessage, AIMessage
 

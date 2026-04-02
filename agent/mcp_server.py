@@ -30,9 +30,8 @@ except Exception as e:
     sys.exit(1)
 
 def get_firestore_client():
-    """Initialize Firebase Admin SDK lazily and return the Firestore client."""
+    """Initialize Firebase Admin SDK lazily and return the Firestore client or diagnostic error string."""
     if not firebase_admin._apps:
-        # First, attempt to load raw JSON from cloud environment secrets (HuggingFace / Streamlit Cloud)
         firebase_secret = os.environ.get("FIREBASE_JSON_STRING")
         if firebase_secret:
             try:
@@ -41,13 +40,13 @@ def get_firestore_client():
                 firebase_admin.initialize_app(cred)
                 return firestore.client()
             except Exception as e:
-                logger.warning(f"Failed to parse FIREBASE_JSON_STRING format: {e}")
+                return f"JSON Parse Error. Length: {len(firebase_secret)} chars. Exception: {e}"
                 
-        # Second, fallback to physical local machine path
         cred_path = os.environ.get("FIREBASE_CREDENTIALS_PATH")
         if not cred_path or not os.path.exists(cred_path):
-            logger.warning(f"Firebase Credentials not found at '{cred_path}'. Returning None.")
-            return None
+            env_keys = list(os.environ.keys())
+            has_secret = 'FIREBASE_JSON_STRING' in env_keys
+            return f"Credentials not found. Path searched: '{cred_path}'. Secret configured in os.environ: {has_secret}"
             
         cred = credentials.Certificate(cred_path)
         firebase_admin.initialize_app(cred)
@@ -57,8 +56,8 @@ def get_firestore_client():
 def fetch_promo_from_db(location: str) -> str:
     """Synchronously fetch promotion data from Firestore."""
     db = get_firestore_client()
-    if not db:
-        return "PROMO: (Database offline) 5% off everything."
+    if isinstance(db, str):
+        return f"PROMO: (Database offline) 5% off everything. | Diagnosics -> {db}"
         
     promos_ref = db.collection("promotions")
     query = promos_ref.where("location", "==", location.lower()).limit(1)
