@@ -41,9 +41,13 @@ class RetailMCPClient:
 
     async def __aenter__(self):
         """Start the MCP server subprocess and initialize the session."""
+        import os
+        env = os.environ.copy()
+        
         server_params = StdioServerParameters(
             command=sys.executable,
-            args=[self.script_path]
+            args=[self.script_path],
+            env=env
         )
         
         self._exit_stack = AsyncExitStack()

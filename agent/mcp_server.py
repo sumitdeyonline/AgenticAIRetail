@@ -11,8 +11,12 @@ import mcp.types as types
 from mcp.server import NotificationOptions, Server
 import mcp.server.stdio
 
+import sys
+
 load_dotenv()
-logging.basicConfig(level=logging.INFO)
+# CRITICAL: Streamlit Cloud dynamically captures stdout/stderr which breaks pure JSON-RPC! 
+# We MUST suppress all non-critical logging to prevent protocol corruption during startup.
+logging.basicConfig(level=logging.CRITICAL, stream=sys.stderr)
 logger = logging.getLogger("mcp-retail-server")
 
 # Basic MCP server for retail
