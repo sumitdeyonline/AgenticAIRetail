@@ -1,20 +1,4 @@
 import os
-import sys
-import subprocess
-import importlib
-
-# --- STREAMLIT CLOUD DEPENDENCY HOT-PATCH ---
-# Strict deployment caches (like uv.lock or stale requirements.txt containers) 
-# on Streamlit Cloud are skipping our firebase dependency. Force it at runtime!
-try:
-    import firebase_admin
-except ImportError:
-    print("Firebase Admin missing! Hard-installing into user container...", file=sys.stderr)
-    subprocess.check_call([sys.executable, "-m", "pip", "install", "--user", "firebase-admin>=6.2.0"])
-    
-    # Critically force Python to rescan its available modules so it detects the newly downloaded library!
-    importlib.invalidate_caches()
-
 import asyncio
 import streamlit as st
 from dotenv import load_dotenv
