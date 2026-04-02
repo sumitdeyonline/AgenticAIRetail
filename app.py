@@ -1,6 +1,8 @@
 import os
 import asyncio
 import streamlit as st
+from dotenv import load_dotenv
+
 load_dotenv()
 
 # --- STREAMLIT CLOUD SECRET BRIDGE ---
