@@ -46,7 +46,7 @@ class RetailMCPClient:
         
         server_params = StdioServerParameters(
             command=sys.executable,
-            args=[self.script_path],
+            args=["-W", "ignore", self.script_path],
             env=env
         )
         

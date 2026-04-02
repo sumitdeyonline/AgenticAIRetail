@@ -1,7 +1,16 @@
+import os
+import sys
+
+# --- STREAMLIT CLOUD SQLITE PATCH ---
+# Streamlit Community Cloud runs an older Debian Linux with SQLite < 3.35.
+# ChromaDB 0.4+ uses Rust bindings that require modern SQLite "RETURNING" syntax. 
+# We MUST forcefully hot-swap the system SQLite engine with pysqlite3-binary before importing chromadb!
+if os.path.exists("/mount/src") or os.environ.get("FIREBASE_JSON_STRING"):
+    __import__('pysqlite3')
+    sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')
+
 import chromadb
 from chromadb.utils import embedding_functions
-
-import os
 
 # Local folder where data will be stored.
 # Streamlit Cloud's network-mounted containers (/mount/src) don't support strict SQLite WAL file locks, 

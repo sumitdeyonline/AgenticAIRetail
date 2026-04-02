@@ -186,7 +186,14 @@ if prompt := st.chat_input("Ask about inventory, orders, or promotions..."):
                     loop = asyncio.new_event_loop()
                     asyncio.set_event_loop(loop)
                     
-                assistant_msg = loop.run_until_complete(process_query())
+                try:
+                    assistant_msg = loop.run_until_complete(process_query())
+                except Exception as e:
+                    import traceback
+                    err_trace = traceback.format_exc()
+                    if hasattr(e, "error"):
+                        err_trace += f"\n\nJSON-RPC PAYLOAD:\n{e.error}"
+                    assistant_msg = AIMessage(content=f"**CRITICAL MCP EXCEPTION:**\n\nThe cloud runtime crashed. Here is the raw unredacted error:\n```python\n{err_trace}\n```")
                 
                 # Store and display result
                 st.session_state.messages.append(assistant_msg)
