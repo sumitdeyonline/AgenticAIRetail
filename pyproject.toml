@@ -19,4 +19,5 @@ dependencies = [
     "langchain-groq>=1.1.2",
     "grandalf>=0.8",
     "pinecone>=8.1.0",
+    "firebase-admin>=6+",
 ]
