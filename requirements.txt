@@ -6,7 +6,7 @@ openai
 groq
 python-dotenv
 langchain-community
-onnxruntime<1.20
+onnxruntime
 mcp
 langchain_openai
 langchain_groq
