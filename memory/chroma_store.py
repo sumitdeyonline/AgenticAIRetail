@@ -1,8 +1,15 @@
 import chromadb
 from chromadb.utils import embedding_functions
 
-# Local folder where data will be stored
-PERSIST_DIR = "./data/chroma_store"
+import os
+
+# Local folder where data will be stored.
+# Streamlit Cloud's network-mounted containers (/mount/src) don't support strict SQLite WAL file locks, 
+# resulting in 'InternalError' exactly when adding vectors. Redirecting to /tmp fixes this instantly!
+if os.path.exists("/mount/src") or os.environ.get("FIREBASE_JSON_STRING"):
+    PERSIST_DIR = "/tmp/chroma_store"
+else:
+    PERSIST_DIR = "./data/chroma_store"
 
 # Initialize ChromaDB client
 client = chromadb.PersistentClient(path=PERSIST_DIR)
