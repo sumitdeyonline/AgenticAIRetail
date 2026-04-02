@@ -1,0 +1,77 @@
+graph TD
+    %% Base Interaction
+    User([👤 User]) -->|Interacts & Submits Chat| UI
+
+    %% Streamlit Frontend
+    subgraph Frontend [Streamlit Application UI]
+        direction TB
+        UI[app.py Main Gateway]
+        Chat[💬 Chat Interface]
+        CostAnalytics[📊 Token & Cost Tracker]
+        NavPane[📌 Session Rehydrator Navbar]
+        
+        UI --- Chat
+        UI --- CostAnalytics
+        UI --- NavPane
+    end
+
+    %% Memory Layer (Local Persistent)
+    subgraph Memory [ChromaDB Local Vector Memory]
+        direction LR
+        Store[chroma_store.py Manager]
+        RAGCollection[retail_memory Collection]
+        HistoryCollection[chat_history Collection]
+        
+        Store --> RAGCollection
+        Store --> HistoryCollection
+    end
+    
+    %% Orchestration Layer
+    subgraph Orchestration [LangGraph Agent Orchestration]
+        AgentGraph[🧠 LangGraph Network]
+        LLMProvider[⚡ Groq Llama3.3 70B / OpenAI Fallback]
+        
+        AgentGraph <-->|Streaming Callbacks| LLMProvider
+    end
+
+    %% Standard Database Layer Cloud
+    subgraph NativeCloud [Native Cloud DB Integrations]
+        NativeTools[🛠️ agent/tools.py Functions]
+        Pinecone[(🌲 Pinecone Vector DB)]
+        
+        NativeTools <-->|Semantic Queries| Pinecone
+    end
+
+    %% MCP External Layer
+    subgraph MCPLayer [Model Context Protocol Server]
+        MCPServer[🔌 MCP Subprocess mcp_server.py]
+        Firebase[(🔥 Google Firebase Firestore)]
+        
+        MCPServer <-->|Promotional Lookups| Firebase
+    end
+
+    %% Data Flow Mapping
+    UI <-->|Logs & Loads Sessions| Store
+    UI -->|Hooks MCP Context| MCPServer
+    Chat -->|Forwards Async Prompts| AgentGraph
+    
+    %% Agent Execution Flow
+    AgentGraph -->|Retrieves Preference Context| Store
+    AgentGraph -->|Executes Hardcoded Tools| NativeTools
+    AgentGraph <-->|Discovers & Invokes MCP Tools| MCPServer
+    
+    %% Analytics Flow
+    AgentGraph -->|Broadcasts Metric Tokens| CostAnalytics
+
+    %% Cosmetic Group Stylings
+    classDef frontend fill:#1e1e2f,stroke:#4facfe,stroke-width:2px,color:#cfd4e1;
+    classDef orchestration fill:#2c1b3f,stroke:#c42bb7,stroke-width:2px,color:#cfd4e1;
+    classDef memory fill:#0d2325,stroke:#00b894,stroke-width:2px,color:#cfd4e1;
+    classDef database fill:#2f1515,stroke:#e66767,stroke-width:2px,color:#cfd4e1;
+    classDef toolset fill:#1a1c29,stroke:#576574,stroke-width:2px,color:#cfd4e1;
+
+    class Frontend frontend;
+    class Orchestration orchestration;
+    class Memory memory;
+    class NativeCloud database;
+    class MCPLayer toolset;

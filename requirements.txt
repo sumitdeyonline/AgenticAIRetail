@@ -1,0 +1,15 @@
+chromadb 
+streamlit
+langgraph
+langchain
+openai
+groq
+python-dotenv
+langchain-community
+onnxruntime<1.20
+mcp
+langchain_openai
+langchain_groq
+grandalf
+pinecone
+firebase-admin
