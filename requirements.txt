@@ -13,4 +13,3 @@ langchain_groq
 grandalf
 pinecone
 firebase-admin
-pysqlite3-binary

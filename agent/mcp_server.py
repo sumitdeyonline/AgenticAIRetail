@@ -1,26 +1,33 @@
-import os
-import asyncio
-import json
-import logging
-from dotenv import load_dotenv
-
-import firebase_admin
-from firebase_admin import credentials, firestore
-from mcp.server.models import InitializationOptions
-import mcp.types as types
-from mcp.server import NotificationOptions, Server
-import mcp.server.stdio
-
 import sys
+import traceback
 
-load_dotenv()
-# CRITICAL: Streamlit Cloud dynamically captures stdout/stderr which breaks pure JSON-RPC! 
-# We MUST suppress all non-critical logging to prevent protocol corruption during startup.
-logging.basicConfig(level=logging.CRITICAL, stream=sys.stderr)
-logger = logging.getLogger("mcp-retail-server")
+try:
+    import os
+    import asyncio
+    import json
+    import logging
+    from dotenv import load_dotenv
 
-# Basic MCP server for retail
-server = Server("retail-promotions-server")
+    import firebase_admin
+    from firebase_admin import credentials, firestore
+    from mcp.server.models import InitializationOptions
+    import mcp.types as types
+    from mcp.server import NotificationOptions, Server
+    import mcp.server.stdio
+
+    load_dotenv()
+    # CRITICAL: Streamlit Cloud dynamically captures stdout/stderr which breaks pure JSON-RPC! 
+    # We MUST suppress all non-critical logging to prevent protocol corruption during startup.
+    logging.basicConfig(level=logging.CRITICAL, stream=sys.stderr)
+    logger = logging.getLogger("mcp-retail-server")
+
+    # Basic MCP server for retail
+    server = Server("retail-promotions-server")
+
+except Exception as e:
+    with open("/tmp/mcp_crash.txt", "w") as f:
+        f.write("IMPORT ERROR:\n" + traceback.format_exc())
+    sys.exit(1)
 
 def get_firestore_client():
     """Initialize Firebase Admin SDK lazily and return the Firestore client."""
@@ -125,4 +132,9 @@ async def main():
         )
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    try:
+        asyncio.run(main())
+    except Exception as e:
+        with open("/tmp/mcp_crash.txt", "w") as f:
+            f.write("RUNTIME ERROR:\n" + traceback.format_exc())
+        sys.exit(1)

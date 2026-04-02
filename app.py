@@ -190,10 +190,17 @@ if prompt := st.chat_input("Ask about inventory, orders, or promotions..."):
                     assistant_msg = loop.run_until_complete(process_query())
                 except Exception as e:
                     import traceback
+                    import os
                     err_trace = traceback.format_exc()
                     if hasattr(e, "error"):
                         err_trace += f"\n\nJSON-RPC PAYLOAD:\n{e.error}"
-                    assistant_msg = AIMessage(content=f"**CRITICAL MCP EXCEPTION:**\n\nThe cloud runtime crashed. Here is the raw unredacted error:\n```python\n{err_trace}\n```")
+                        
+                    crash_log = ""
+                    if os.path.exists("/tmp/mcp_crash.txt"):
+                        with open("/tmp/mcp_crash.txt", "r") as f:
+                            crash_log = f"\n\n🚨 SUBPROCESS CRASH LOG:\n```python\n{f.read()}\n```"
+                            
+                    assistant_msg = AIMessage(content=f"**CRITICAL MCP EXCEPTION:**\n\nThe cloud runtime crashed. Here is the raw unredacted error:\n```python\n{err_trace}\n```{crash_log}")
                 
                 # Store and display result
                 st.session_state.messages.append(assistant_msg)
